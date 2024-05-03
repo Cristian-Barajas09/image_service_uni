@@ -1,14 +1,16 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import SQLModel
+import dotenv
 from routers import images_router
 from database.config import engine
-from sqlmodel import SQLModel
 
 
 SQLModel.metadata.create_all(engine)
 
 app = FastAPI()
-
+dotenv.load_dotenv()
 
 app.include_router(
     images_router.router,
@@ -17,7 +19,7 @@ app.include_router(
 
 
 origins = [
-    "*"
+    os.getenv("SERVER_URL"),
 ]
 
 app.add_middleware(
