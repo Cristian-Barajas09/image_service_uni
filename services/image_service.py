@@ -3,7 +3,7 @@ import string
 from fastapi import UploadFile
 from sqlmodel import Session, select
 from sqlalchemy.engine import Engine
-
+from fastapi import HTTPException
 from database.models import Image
 
 class ImageService:
@@ -13,9 +13,18 @@ class ImageService:
 
 
     async def save_image(self,file: UploadFile):
+        content_type = self.convert_type(file.content_type)
+        
+        if not content_type:
+            raise HTTPException(
+                status_code=400,
+                detail="Image type not supported"
+            )
+
         new_name = self.format_name(
-            self.convert_type(file.content_type)
+            content_type
         )
+
         url = f"http://localhost:8000/images/{new_name}"
         real_path = f"./media/{new_name}"
 
@@ -55,7 +64,9 @@ class ImageService:
 
     def convert_type(self,content_type):
         IMAGE_TYPE = {
-            "image/jpeg": 'jpeg'
+            "image/jpeg": 'jpeg',
+            "image/png": 'png',
+            "image/jpg": 'jpg',
         }
 
         return IMAGE_TYPE.get(content_type,None)
