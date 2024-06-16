@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 import dotenv
 from routers import images_router
 from database.config import engine
-
+from middlewares.error_handler import ErrorHandlerMiddleware
 
 SQLModel.metadata.create_all(engine)
 
@@ -21,7 +21,7 @@ app.include_router(
 origins = [
     os.getenv("SERVER_URL"),
 ]
-
+app.add_middleware(ErrorHandlerMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -29,5 +29,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
