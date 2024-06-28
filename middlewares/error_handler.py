@@ -1,10 +1,15 @@
 """Middleware to handle exceptions and return a JSON response with status code 400"""
-from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import FastAPI
 from fastapi import status
 from fastapi.responses import JSONResponse
 
-class ErrorHandlerMiddleware(Middleware):
+class ErrorHandlerMiddleware(BaseHTTPMiddleware):
     """Middleware to handle exceptions and return a JSON response with status code 400"""
+
+    def __init__(self, app: FastAPI ) -> None:
+        super().__init__(app)
+
     async def dispatch(self, request, call_next):
         """Middleware to handle exceptions and return a JSON response with status code 400"""
         try:
