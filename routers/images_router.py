@@ -1,8 +1,12 @@
+"""Images router"""
+from typing import Annotated
 from fastapi import APIRouter
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from fastapi import HTTPException
 from fastapi import status
+from fastapi import Depends
+from schemas.image_schema import ImageSchema, DataSchema
 from services.image_service import ImageService
 
 from database.config import engine
@@ -10,24 +14,24 @@ from database.config import engine
 router = APIRouter()
 
 
-@router.get("/")
-def get_images():
-    service = ImageService(engine)
-    return {
-        "data": [
-            {
-                "id": image.id,
-                "name": image.name,
-                "url": image.url
-            } for image in service.get_images()
-        ]
-    }
+@router.get("/",response_model=DataSchema)
+def get_images(image_service: Annotated[ImageService,Depends()]):
+    """Get images"""
+    image_service.set_engine(engine)
 
-@router.get("/{file_name}")
-async def get_image(file_name: str):
-    sevice = ImageService(engine)
+    return DataSchema(data=[
+        ImageSchema(**{
+            "path": f"/images/{image.name}",
+            "name": image.name
+        }) for image in image_service.get_images()
+    ])
 
-    image = await sevice.get_image(file_name)
+@router.get("/{file_name}",response_class=FileResponse)
+async def get_image(file_name: str,image_service: Annotated[ImageService,Depends()]):
+    """Get image"""
+    image_service.set_engine(engine)
+
+    image = await image_service.get_image(file_name)
 
     if not image:
         raise HTTPException(
@@ -37,19 +41,28 @@ async def get_image(file_name: str):
 
     return FileResponse(image.realPath,media_type=image.contentType)
 
-@router.post("/")
+
+
+@router.post("/",response_model=ImageSchema)
 async def create_image(
-    image: UploadFile
+    image: UploadFile, image_service: Annotated[ImageService,Depends()]
 ):
-    service = ImageService(engine)
-    return await service.save_image(image)
+    """Create image"""
+    image_service.set_engine(engine)
+
+    image_result = await image_service.save_image(image)
+
+    return ImageSchema(
+        **image_result["data"]
+    )
 
 @router.put("/image_id}")
 async def update_image(image_id: int):
-    
+    """Update image"""
 
     return {"image": image_id}
 
 @router.delete("/{image_id}")
 def delete_image(image_id: int):
+    """Delete image"""
     return {"image": image_id}
