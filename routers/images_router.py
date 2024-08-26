@@ -52,8 +52,10 @@ async def create_image(
 
     image_result = await image_service.save_image(image)
 
-    return ImageSchema(
-        **image_result["data"]
+    return DataSchema(
+        data = ImageSchema(
+            **image_result["data"]
+        )
     )
 
 @router.put("/image_id}")
