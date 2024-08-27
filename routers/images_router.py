@@ -11,10 +11,10 @@ from services.image_service import ImageService
 
 from database.config import engine
 
-router = APIRouter()
+router = APIRouter(tags=["images"])
 
 
-@router.get("/",response_model=DataSchema)
+@router.get("/", response_model=DataSchema[list[ImageSchema]])
 def get_images(image_service: Annotated[ImageService,Depends()]):
     """Get images"""
     image_service.set_engine(engine)
@@ -43,7 +43,7 @@ async def get_image(file_name: str,image_service: Annotated[ImageService,Depends
 
 
 
-@router.post("/",response_model=ImageSchema)
+@router.post("/",response_model=DataSchema[ImageSchema])
 async def create_image(
     image: UploadFile, image_service: Annotated[ImageService,Depends()]
 ):

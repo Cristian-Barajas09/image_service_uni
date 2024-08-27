@@ -1,7 +1,6 @@
 from sqlmodel import SQLModel, Field
 
-
-
+# create model to register access servers
 
 class Image(SQLModel, table=True):
     id: int = Field(

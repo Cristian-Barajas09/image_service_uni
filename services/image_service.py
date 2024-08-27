@@ -2,9 +2,10 @@
 import random
 import string
 from fastapi import UploadFile
-from exceptions.image_exceptions import ImageTypeNotSupportedError
-from sqlmodel import Session, select
 from sqlalchemy.engine import Engine
+from sqlmodel import Session, select
+from utils import make_url_path
+from exceptions.image_exceptions import ImageTypeNotSupportedError
 from database.models import Image
 
 class ImageService:
@@ -32,7 +33,7 @@ class ImageService:
             content_type
         )
 
-        url = f"http://localhost:8000/images/{new_name}"
+        url = make_url_path(f"images/{new_name}")
         real_path = f"./media/{new_name}"
 
         with open(real_path,'wb') as save_file:
@@ -48,7 +49,7 @@ class ImageService:
             realPath=real_path,
             contentType=file.content_type
         )
-        print(image)
+
 
         with Session(self.engine) as session:
             session.add(image)
@@ -60,7 +61,7 @@ class ImageService:
         return {
             "data": {
                 "name": image.name,
-                "path": "/images/" + image.name
+                "path": make_url_path(f"images/{image.name}"),
             }
         }
 
